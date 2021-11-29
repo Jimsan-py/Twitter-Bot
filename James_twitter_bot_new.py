@@ -7,7 +7,7 @@ Functional Requirement
 - They Explain “What The System Does.”	
 - Helps You Verify The Functionality Of The Software.	
 - They Are Captured In Use Cases.	
-- Easy To Define.	
+- Easy To Define.
 - Focus On User Requirement.	
 
 
@@ -22,7 +22,7 @@ Non-functional Requirements
 --------------------------------------------------------------------------------------------------------------------------
 A. What - Requirement Analysis - Functional Requirements (FRs)
 
-What?: a Twitter Bot that gathers tweets relating to commodities
+What?: a Twitter Bot that gathers tweets relating to commodities 
 
 Big Brain Commodities
 In retrospect, it was inevitable."
@@ -34,7 +34,7 @@ FR 1. Like a tweet using a random search term from list.
 FR 2 Retweet a tweet relating to commodities by select
 group of friends in past day
 FR 3. Retweet a trending tweet
-FR 4. Follow people who are following list of trusted users.
+FR 4. Follow people who are following list of trusted users. 
 FR 5. Extract commodity prices from CNBC and tweet.
 Only do this once every six hours.
 FR 4. News generator - specified scraper function to extract news headlines.
@@ -143,6 +143,7 @@ class BB_Com():
         self.nrTweets_following = 0
         self.retweets_count = 0
         self.price_dict = {}
+        self.time_stamp_tweet_text_file = "C:\\Users\\Hamil\\OneDrive\\Python\\Projects\\Twitter bot\\BB-Com-Twitter-Bot\\time_stamp_tweet.txt"
         self.url_prices_cnbc_dict = {
                                      "$WTI Crude":
                                         "https://www.cnbc.com/quotes/@CL.1",
@@ -261,7 +262,7 @@ class BB_Com():
         counter = 0 
         
     def tweet_prices(self):
-        self.text_file = open("C:\\Users\\jhamilton2\\Desktop\\Python\\twitter bot\\time_stamp_tweet.txt", "w")
+        self.text_file = open(self.time_stamp_tweet_text_file, "w")
         if self.tweet_text:
             try:
                 tweet_prices_one_tweet = api.update_status(self.tweet_text)
@@ -291,7 +292,7 @@ class BB_Com():
 
     def compare_price_tweet_timestamp_to_present(self):
         try:
-            with open("C:\\Users\\jhamilton2\\Desktop\\Python\\twitter bot\\time_stamp_tweet.txt", "r") as file:
+            with open(self.time_stamp_tweet_text_file, "r") as file:
                 first_line = file.readline()
 
             timestamp1 = first_line
@@ -299,8 +300,9 @@ class BB_Com():
 
             print(timestamp1)
             print(timestamp2)
-            t1 = datetime.strptime(timestamp1, "%Y-%m-%d %H:%M:%S") #UTC
+            t1 = datetime.strptime(timestamp1, "%Y-%m-%d %H:%M:%S.%f") #UTC
             t2 = datetime.strptime(timestamp2, "%Y-%m-%d %H:%M:%S.%f") #UTC
+            print(t1)
             print(f"{t1} UTC")
             print(f"{t2} UTC")
             difference = t1 - t2
