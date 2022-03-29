@@ -1,72 +1,3 @@
-''' decompose the task into subtasks & assign a function for each subtask
-SDLC SW development lifecycle
-
-**************************************************************************************************************************
-Functional Requirement 	
-- Functional Requirements Form The Behavior Of The Product.
-- They Explain “What The System Does.”	
-- Helps You Verify The Functionality Of The Software.	
-- They Are Captured In Use Cases.	
-- Easy To Define.
-- Focus On User Requirement.	
-
-
-Non-functional Requirements
-- Non-functional requirements describe the general software characteristics.
-- They explain “How the system works.”
-- Helps you verify the performance of the software.
-- They are captured as a quality attribute.
-- Difficult to define.
-- Focus on the user's expectation and experience.
-
---------------------------------------------------------------------------------------------------------------------------
-A. What - Requirement Analysis - Functional Requirements (FRs)
-
-What?: a Twitter Bot that gathers tweets relating to commodities 
-
-Big Brain Commodities
-In retrospect, it was inevitable."
-
-Prerequisites:
-- Acquiring a Twitter Developer Account [DONE]
-
-FR 1. Like a tweet using a random search term from list.
-FR 2 Retweet a tweet relating to commodities by select
-group of friends in past day
-FR 3. Retweet a trending tweet
-FR 4. Follow people who are following list of trusted users. 
-FR 5. Extract commodity prices from CNBC and tweet.
-Only do this once every six hours.
-FR 4. News generator - specified scraper function to extract news headlines.
-Generate hashtags. Use google news
-FR 5. Sleep between FR 1 - 5 for 30 mins to an hour
-
-#use random intervals for sleep to make more human like
-
-Non-functional requirements (NFRs) - UI, effectiveness, security
-NFR1. Connect To Twitter and get API tokens #
-
-Notes-------------------------------
-Use hashtags
-extract headlines and use links in tweets
-Use emojis
-Link to twitter feed using $
-
---------------------------------------------------------------------------------------------------------------------------
-B. How - Design
-Classes
-BB_Com
-BB_comDemo
-
-methods
-init()
-search_and_like()
-retweet_using_search_terms()
-
-Resources
-https://www.freecodecamp.org/news/how-to-build-and-deploy-a-multifunctional-twitter-bot-49e941bb3092/
---------------------------------------------------------------------------------------------------------------------------
-C. Write the code - Implementation'''
 from datetime import date, datetime
 from random import choice, randint
 from time import sleep
@@ -79,9 +10,11 @@ from tweepy import API, Cursor, OAuthHandler, TweepError
 from selenium import webdriver
 from collections import Counter
 from string import punctuation
-import operator
+# import operator
+from rake_nltk import rake
 # import RAKE
-from James_twitter_bot_keys_tokens import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
+import operator
+from bot_keys_tokens import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
 
 auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
@@ -91,7 +24,7 @@ api = API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 user = api.me()
 
 
-class BB_Com():
+class TwitterBot():
 
     def __init__(self):
         '''Constructor, called when we create an object of the class
@@ -177,11 +110,14 @@ class BB_Com():
         self.articles_headlines = ''
         self.link = ''
         self.tweet_article_hashtags = ''
-        self.stop_dir = "C:\\Users\\jhamilton2\\Desktop\\Python\\twitter bot\\stop_words.txt"
+        self.stop_dir = "C:\\Users\\Hamil\\OneDrive\\Python\\Projects\\Twitter bot\\BB-Com-Twitter-Bot\\SmartStoplist.txt"
         self.followers = api.followers_ids("CommoditiesBb")
         self.friends = api.friends_ids("CommoditiesBb")
 
     def search_and_like(self):
+        """
+        It searches for a hashtag and likes the most recent post.
+        """
         self.nrTweets_following = 10
         self.nrTweets_random_search = 1
 
@@ -201,6 +137,9 @@ class BB_Com():
                     print("An exception occurred")
 
     def retweet_from_selected_user_list_method(self):
+        """
+        This function will retweet from the selected user list
+        """
         
         success_retweet = False
 
@@ -227,32 +166,52 @@ class BB_Com():
         d = date.today().weekday()
         if d in range(5):
             for i in self.url_prices_cnbc_dict:
-                # if counter < len(key_list):
-                    try:
+                if counter <=4:
+                    # try:
                         result = get(self.url_prices_cnbc_dict[i])
                         c = result.content
                         soup = BeautifulSoup(c, 'html.parser')
                         time_of_information = soup.find("div", {"class": ["QuoteStrip-lastTradeTime"]})
                         current_price = soup.find("span", {"class": ["QuoteStrip-lastPrice"]})
-                        current_change_price = soup.find("span", {"class": ["QuoteStrip-changeUp"]})
-                        current_change_price_percentage = soup.find("span", {"class": ["QuoteStrip-changeUp"]})
+                        print(current_price)
+                        current_change_price_up= soup.find("span", {"class": ["QuoteStrip-changeUp"]})
+                        if current_change_price_up == None:
+                            current_change_price = soup.find("span", {"class": ["QuoteStrip-changeDown"]})
+                            print(f'Current Change price down{current_change_price}')
+                        else:    
+                            current_change_price = soup.find("span", {"class": ["QuoteStrip-changeUp"]})
+                            print(f'Current Change price up{current_change_price}')
+                        print(current_change_price)
                         price_text = f"{key_list[counter]}: {current_price.get_text()} "
                         current_change_price_text = f"{current_change_price.get_text()} "
-                        print(f"{key_list[counter]} change in price : {current_change_price.get_text()} ")
+                        current_change_price_text_float = float(current_change_price_text[current_change_price_text.find("(")+1:current_change_price_text.find("%")])
+                        print(current_change_price_text_float)
                         if '+' in current_change_price_text:
-                            emoji = 'U+2B06 \n'
+                            if current_change_price_text_float > 5.00:
+                                emoji = "\U0001f680"
+                            else:
+                                emoji = "\U0001f53C"
                         elif '-' in current_change_price_text:
-                            emoji = 'U+2B07 \n'
-                        combined_prices_and_emojis = price_text + current_change_price_text + emoji
+                            if current_change_price_text_float <= -10.00:
+                                emoji = "\U0001f198"
+                            elif -9.99 < current_change_price_text_float < -5.00:
+                                emoji = "\U0001f53D" + "\U0001f53D"
+                            else:
+                                emoji = "\U0001f53D"
+                        print(emoji)
+                        combined_prices_and_emojis = price_text + current_change_price_text + emoji + "\n"
                         self.tweet_text += combined_prices_and_emojis
                         counter += 1
-                    except TweepError as e:
-                        print(e.reason)
-                    except Exception as general_exception:
-                        print("An exception occurred")
+                    # except TweepError as e:
+                    #     print(e.reason)
+                    # except Exception as general_exception:
+                    #     print("An exception occurred")
+                else:
+                    break
         cnbc_time = f"USD - Source: CNBC {time_of_information.get_text()}"
         print(cnbc_time)
         self.tweet_text += cnbc_time
+        print(self.tweet_text)
         '''
                     https://hackersandslackers.com/scraping-urls-with-beautifulsoup/
 
@@ -291,7 +250,7 @@ class BB_Com():
                 print("An exception occurred")
 
     def compare_price_tweet_timestamp_to_present(self):
-        try:
+        # try:
             with open(self.time_stamp_tweet_text_file, "r") as file:
                 first_line = file.readline()
 
@@ -300,7 +259,7 @@ class BB_Com():
 
             print(timestamp1)
             print(timestamp2)
-            t1 = datetime.strptime(timestamp1, "%Y-%m-%d %H:%M:%S.%f") #UTC
+            t1 = datetime.strptime(timestamp1, "%Y-%m-%d %H:%M:%S") #UTC
             t2 = datetime.strptime(timestamp2, "%Y-%m-%d %H:%M:%S.%f") #UTC
             print(t1)
             print(f"{t1} UTC")
@@ -318,8 +277,8 @@ class BB_Com():
                 print(f'False - {seconds_between_price_tweets/3600} hours have'
                       'not elapsed yet between now and the last price tweet')
                 return False
-        except Exception as general_exception:
-            print("An exception occurred")
+        # except Exception as general_exception:
+        #     print("An exception occurred")
 
     def unfollow_people_who_do_not_follow_back(self):
         print(len(self.friends))
@@ -369,39 +328,39 @@ class BB_Com():
             print(f"self.link {self.link}")
             html = urlopen(self.link) 
             
-            # use selenium here to interface with 
-            # web page. Captchas and cookies require interaction. 
-            # if javascript is used to dynamically generate content, 
-            # then there potentially might be issues
-            '''.read()
-            soup = BeautifulSoup(html)
+            # # use selenium here to interface with 
+            # # web page. Captchas and cookies require interaction. 
+            # # if javascript is used to dynamically generate content, 
+            # # then there potentially might be issues
+            # # .read()
+            # soup = BeautifulSoup(html)
 
-            # kill all script and style elements
-            for script in soup(["script", "style"]):
-                script.extract()    # rip it out
+            # # kill all script and style elements
+            # for script in soup(["script", "style"]):
+            #     script.extract()    # rip it out
 
-            # get text
-            text = soup.get_text()
+            # # get text
+            # text = soup.get_text()
 
-            # break into lines and remove leading and trailing space on each
-            lines = [line for line in text.splitlines()]
-            print(f"lines:{lines}")
-            # break multi-headlines into a line each
-            chunks = (phrase.strip() for line in lines for phrase in line.split(" "))
-            # drop blank lines
-            text = '\n'.join(chunk for chunk in chunks if chunk)
-            text_lower = text.lower()
-            text_lower_split = text_lower.split()
-            alphanumeric_words = [word for word in text_lower_split if word.isalpha()]
-            result = ' '.join(alphanumeric_words)
-            str_result = result
+            # # break into lines and remove leading and trailing space on each
+            # lines = [line for line in text.splitlines()]
+            # print(f"lines:{lines}")
+            # # break multi-headlines into a line each
+            # chunks = (phrase.strip() for line in lines for phrase in line.split(" "))
+            # # drop blank lines
+            # text = ' '.join(chunk for chunk in chunks if chunk)
+            # text_lower = text.lower()
+            # text_lower_split = text_lower.split()
+            # alphanumeric_words = [word for word in text_lower_split if word.isalpha()]
+            # result = ' '.join(alphanumeric_words)
+            # str_result = result
 
-            print(text_lower.encode('utf-8'))
+            # print(str_result.encode('utf-8'))
 
-            rake_object = RAKE.Rake(self.stop_dir)
-            print(rake_object)
-            keywords = rake_object.run(str_result) 
-            print("Keywords:", keywords[0:4])'''
+            # rake_object = rake.Rake(self.stop_dir,ranking_metric=5, max_length=3, min_length=2)
+            # print(rake_object)
+            # keywords = rake_object.run(str_result) 
+            # print("Keywords:", keywords[0:4])
 
             
             api.update_status(f"{title} \nRead more {str(self.link)} \n {self.link} \n {self.tweet_article_hashtags}")
@@ -411,6 +370,9 @@ class BB_Com():
         "https://stackoverflow.com/questions/60792898/tag-of-google-news-title-for-beautiful-soup"
     
     def run(self):
+        """
+        This function is the main function that runs the bot. It calls the other functions in the class.
+        """
         d = date.today().weekday() 
 
         while True:
@@ -434,11 +396,12 @@ class BB_Com():
             print("This cycle is ending. Time to sleep")
             sleep((randint(1800, 3600)))
 
-class BB_comDemo(): #put in another file?
+class TwitterBotDemo(): #put in another file?
     def run_demo(self):
         '''main instance
         '''        
-    bb_com = BB_Com()
-    bb_com.run()
+    twitter_bot = TwitterBot()
+    twitter_bot.run()
 
 '''D. Testing'''
+
