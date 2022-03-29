@@ -34,49 +34,14 @@ class TwitterBot():
         self.tweet_count = 0
         self.results = []
         self.count = 0
-        self.term_list = ["Copper market", "tin market", "shipping market",
-                          "coal market", "lithium market",
-                          "natural gas market", "rare earth metals",
-                          "freight market",
-                          "metals market", "oil market",
-                          "LNG market", "crude oil market",
-                          "precious metals markets", "wheat market",
-                          "green energy commodities",
-                          "batteries electric vehicles",
+        self.term_list = ["batteries electric vehicles",
                           "base metals", "iron ore market"]
-        self.retweet_from_selected_user_list = ['dscrybe',
-                                                     'onlyanna100',
-                                                     'jfarchy',
-                                                     'RhiannonHoyle',
-                                                     'Edspencive',
-                                                     'PeterSainsbury7',
-                                                     'FinancialTimes',
-                                                     'ArgusMedia',
-                                                     'commoditypress',
-                                                     'PlattsGas',
-                                                     'amran_abocar',
-                                                     'USDA',
-                                                     'ftenergy',
-                                                     'IEA',
-                                                     'base_metals',
-                                                     'BloombergNEF',
-                                                     'BaseMetals',
-                                                     'plattsmetals',
-                                                     'ClydeCommods',
-                                                     'ETCommodities',
-                                                     'ReutersCommods',
-                                                     'BNCommodities',
-                                                     'ftcommodities',
-                                                     'plattsshipping',
-                                                     'ReutersAg',
-                                                     'climatefinance',
-                                                     'LloydsList',
-                                                     'IHSMarkitMandT']
+        self.retweet_from_selected_user_list = ['x']
         self.nrTweets_random_search = 0
         self.nrTweets_following = 0
         self.retweets_count = 0
         self.price_dict = {}
-        self.time_stamp_tweet_text_file = "C:\\Users\\Hamil\\OneDrive\\Python\\Projects\\Twitter bot\\BB-Com-Twitter-Bot\\time_stamp_tweet.txt"
+        self.time_stamp_tweet_text_file = "C:\\Users\\xx\time_stamp_tweet.txt"
         self.url_prices_cnbc_dict = {
                                      "$WTI Crude":
                                         "https://www.cnbc.com/quotes/@CL.1",
@@ -110,9 +75,9 @@ class TwitterBot():
         self.articles_headlines = ''
         self.link = ''
         self.tweet_article_hashtags = ''
-        self.stop_dir = "C:\\Users\\Hamil\\OneDrive\\Python\\Projects\\Twitter bot\\BB-Com-Twitter-Bot\\SmartStoplist.txt"
-        self.followers = api.followers_ids("CommoditiesBb")
-        self.friends = api.friends_ids("CommoditiesBb")
+        self.stop_dir = "C:\\Users\\xx\SmartStoplist.txt"
+        self.followers = api.followers_ids(insert)
+        self.friends = api.friends_ids(insert)
 
     def search_and_like(self):
         """
@@ -131,7 +96,7 @@ class TwitterBot():
                     success_like = True
                     break
                 except TweepError as e:
-                    print("kek...error")
+                    print("error")
                     print(e.reason)
                 except Exception as general_exception:
                     print("An exception occurred")
@@ -212,12 +177,7 @@ class TwitterBot():
         print(cnbc_time)
         self.tweet_text += cnbc_time
         print(self.tweet_text)
-        '''
-                    https://hackersandslackers.com/scraping-urls-with-beautifulsoup/
 
-                    https://realpython.com/beautiful-soup-web-scraper-python/
-                    https://www.pluralsight.com/guides/extracting-data-html-beautifulsoup
-                    '''
         counter = 0 
         
     def tweet_prices(self):
@@ -366,8 +326,6 @@ class TwitterBot():
             api.update_status(f"{title} \nRead more {str(self.link)} \n {self.link} \n {self.tweet_article_hashtags}")
         except Exception as general_exception:
             print("An exception occurred", general_exception)
-
-        "https://stackoverflow.com/questions/60792898/tag-of-google-news-title-for-beautiful-soup"
     
     def run(self):
         """
@@ -379,7 +337,7 @@ class TwitterBot():
             self.tweet_text = ""
             self.tweet_text_2 = ""
             self.tweet_text_3 = ""
-            print('Hi and welcome to BB_Com demo')
+            print('Hi and welcome to Twitter Bot')
             self.search_and_like()
             sleep((randint(1, 10)))
             self.retweet_from_selected_user_list_method()
